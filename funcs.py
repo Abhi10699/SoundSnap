@@ -9,8 +9,6 @@ from PIL import Image
 
 processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
 model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
-
-
 conn = sqlite3.connect("./session.db", detect_types=sqlite3.PARSE_DECLTYPES)
 
 
@@ -181,9 +179,11 @@ def recommend_songs(image):
   spotify_token = authorize_spotify()
   songs = fetch_playlists(image_logits, spotify_token)
 
-  for i in range(5):
+  payload = []
+  for _ in range(5):
     random_index = random.randrange(len(songs))
     song = songs[random_index]
     track_id = song['track_uri'].split(":")[2]
-    track_path = f"https://open.spotify.com/track/{track_id}"
-    print(track_path) 
+    payload.append(track_id)
+
+  return payload
