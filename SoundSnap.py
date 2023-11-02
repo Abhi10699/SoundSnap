@@ -15,6 +15,7 @@ st.success("Daabase Setup Complete", icon="✅")
 image_file = st.file_uploader(
   "Upload Image", 
   accept_multiple_files=False, 
+  type=['png', 'jpg',"jpeg"] 
 )
 
 
