@@ -3,12 +3,12 @@ import streamlit.components.v1 as components
 from funcs import setup_db, recommend_songs
 
 st.title("SoundSnap 🎵")
+st.write("Discover music through your photos with SoundSnap. Snap a picture, and we'll create personalized playlists to match the ambiance of your images. Explore a new way of finding music that resonates with your moments.")
+
 
 
 with st.spinner("Setting Up Database.."):
   setup_db()
-
-st.success("Daabase Setup Complete", icon="✅")
 
 
 # upload image
