@@ -9,13 +9,17 @@ from PIL import Image
 
 processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
 model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
-conn = sqlite3.connect("./session.db", detect_types=sqlite3.PARSE_DECLTYPES)
+
+
+def get_conn():
+    return sqlite3.connect("./session.db", detect_types=sqlite3.PARSE_DECLTYPES)
 
 
 # db functions
 
 def setup_db():
 
+    conn = get_conn()
     curr = conn.cursor()
     
     # create table
@@ -35,6 +39,7 @@ def setup_db():
 
 
 def get_session_key():
+    conn = get_conn()
     session_fetch_query = """
     SELECT 
         token, 
@@ -50,13 +55,14 @@ def get_session_key():
     row = session_details.fetchone()
     
     session_token = row[0]
-    token_expired = True if row[2] == 1 else False
+    token_expired = True if row[1] == 1 else False
     
     curr.close()
     return session_token,  token_expired    
 
 
 def update_token(token):
+    conn = get_conn()
     session_update_query = f"INSERT INTO tbl_soundsnap_session (token) VALUES ('{token}')"
     curr = conn.cursor()
     curr.execute(session_update_query)
@@ -64,17 +70,7 @@ def update_token(token):
     conn.commit()
 
 # spotify auth
-def authorize_spotify():
-    
-    
-    # check when was the last time session key generated    
-
-    last_token, token_expired = get_session_key()
-
-    if not token_expired:
-        return last_token
-    
-    
+def authorize_spotify():    
     # fetch new token after 1 hour
     spotify_client = "8322d83619b34791b49d90267051ba22"
     spotify_secret = "0d5ef8411a96443bbe5bb4e3f01958ac"
@@ -176,14 +172,16 @@ def recommend_songs(image):
   image = get_image_from_bytes(image)
   image_logits = get_image_logits(image, "what is the activity in this image?")
   
-  spotify_token = authorize_spotify()
-  songs = fetch_playlists(image_logits, spotify_token)
+  try:
+    spotify_token = authorize_spotify()
+    songs = fetch_playlists(image_logits, spotify_token)
+    payload = []
+    for _ in range(5):
+        random_index = random.randrange(len(songs))
+        song = songs[random_index]
+        track_id = song['track_uri'].split(":")[2]
+        payload.append(track_id)
 
-  payload = []
-  for _ in range(5):
-    random_index = random.randrange(len(songs))
-    song = songs[random_index]
-    track_id = song['track_uri'].split(":")[2]
-    payload.append(track_id)
-
-  return payload
+    return payload
+  except:
+    print("Something went wrong..")

@@ -1,6 +1,5 @@
 import streamlit as st
 import streamlit.components.v1 as components
-
 from funcs import setup_db, recommend_songs
 
 st.title("SoundSnap 🎵")
@@ -16,19 +15,19 @@ st.success("Daabase Setup Complete", icon="✅")
 image_file = st.file_uploader(
   "Upload Image", 
   accept_multiple_files=False, 
-  type=["image/png", "image/jpg", "image/jpeg", "image/webp"]
 )
 
 
 if image_file:
   songs = recommend_songs(image_file) 
   for song_id in songs:
-    components.iframe(
+    components.html(
       f"""
       <iframe 
         style="border-radius:12px" 
         src="https://open.spotify.com/embed/track/{song_id}?utm_source=generator" 
-        width="100%" height="352" 
+        width="100%"
+        height="100"
         frameBorder="0" 
         allowfullscreen="" 
         allow="autoplay; 
@@ -39,5 +38,5 @@ if image_file:
         loading="lazy">
       </iframe>
       """,
-      height=352
+      height=100
     )
